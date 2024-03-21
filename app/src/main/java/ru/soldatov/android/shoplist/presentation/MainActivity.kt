@@ -1,17 +1,19 @@
 package ru.soldatov.android.shoplist.presentation
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import ru.soldatov.android.shoplist.R
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var shopListAdapter: ShopListAdapter
+
+    private lateinit var fabAddShopItem: FloatingActionButton
 
     private val viewModel: MainViewModel by lazy {
         ViewModelProvider(this)[MainViewModel::class.java]
@@ -20,9 +22,14 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        fabAddShopItem = findViewById(R.id.button_add_shop_item)
         setupRecyclerView()
         viewModel.shopList.observe(this) {
             shopListAdapter.submitList(it)
+        }
+        fabAddShopItem.setOnClickListener {
+            val intent = ShopItemActivity.newIntentModeAdd(this)
+            startActivity(intent)
         }
     }
 
@@ -40,7 +47,7 @@ class MainActivity : AppCompatActivity() {
                 ShopListAdapter.MAX_POOL
             )
         }
-        setupLongClikListener()
+        setupLongClickListener()
         setupClickListener()
         setupSwipeClickListener()
     }
@@ -69,11 +76,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupClickListener() {
         shopListAdapter.onShopItemClickListener = {
-            Log.d("MainActivity", it.name)
+            val intent = ShopItemActivity.newIntentModeEdit(this, it.id)
+            startActivity(intent)
         }
     }
 
-    private fun setupLongClikListener() {
+    private fun setupLongClickListener() {
         shopListAdapter.onShopItemLongClickListener = {
             viewModel.editShopItem(it)
         }
